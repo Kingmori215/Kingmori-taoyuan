@@ -77,8 +77,15 @@ button:disabled {
   background:#fff3e0;
 }
 
-/* 🔥 異常溫度 */
+/* 🔥 溫度異常 */
 .temp-danger {
+  color:red;
+  font-weight:bold;
+  font-size:16px;
+}
+
+/* 🔥 濕度異常 */
+.humidity-danger {
   color:red;
   font-weight:bold;
   font-size:16px;
@@ -232,29 +239,36 @@ async function loadAllDevices(){
             time.getMinutes().toString().padStart(2,'0');
         }
 
+        // =========================
         // 🔥 溫度異常判斷
+        // =========================
+
         let tempClass = "";
         let tempValue = d.temp;
 
         const temp = parseFloat(d.temp);
 
-        // 🔥 倉儲區域溫度異常判定（可自行修改）
         if(temp > 28){
           tempClass = "temp-danger";
         }
 
+        // =========================
         // 🔥 濕度異常判斷
+        // =========================
+
         let humidityClass = "";
         let humidityValue = d.humidity;
 
         const humidity = parseFloat(d.humidity);
 
-        // 🔥 倉儲區域濕度異常判定（可自行修改）
         if(humidity > 90){
           humidityClass = "humidity-danger";
         }
-        
+
+        // =========================
         // 🔥 複核資訊
+        // =========================
+
         let checkInfo = "未複核";
         let rowClass = "unchecked";
 
@@ -291,17 +305,19 @@ async function loadAllDevices(){
 
         html += `
         <tr class="${rowClass}">
+
           <td>${d.date}</td>
 
           <td>${t}</td>
 
+          <!-- 🔥 溫度 -->
           <td class="${tempClass}">
             ${tempValue}°C
           </td>
 
-          <!-- 🔥 濕度欄位 -->
-          <td>
-            ${d.humidity || ""}%
+          <!-- 🔥 濕度 -->
+          <td class="${humidityClass}">
+            ${humidityValue || ""}%
           </td>
 
           <td>${d.name}</td>
@@ -309,6 +325,7 @@ async function loadAllDevices(){
           <td>${d.remark || ""}</td>
 
           <td>${checkInfo}</td>
+
         </tr>
         `;
       });
@@ -354,7 +371,6 @@ async function submitCheck(){
 
     for(const r of allRows){
 
-      // 只複核未複核資料
       if(!r.checker){
 
         await fetch(API, {
