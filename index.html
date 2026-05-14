@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>冷凍冷藏溫度記錄表</title>
+<title>倉儲溫溼度記錄表</title>
 
 <style>
 body {
@@ -19,7 +19,19 @@ body {
   box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
 
-h2 { margin-top:0; }
+h2 {
+  margin-top:0;
+}
+
+.notice {
+  background:#fff8e1;
+  color:#e65100;
+  padding:10px;
+  border-radius:8px;
+  font-weight:bold;
+  margin-bottom:15px;
+  text-align:center;
+}
 
 input {
   width:100%;
@@ -28,6 +40,7 @@ input {
   border-radius:8px;
   border:1px solid #ccc;
   font-size:16px;
+  box-sizing:border-box;
 }
 
 /* 🔴 異常紅框 */
@@ -75,35 +88,75 @@ button:disabled {
 <body>
 
 <div class="card">
+
+  <!-- 🔥 新增頻率文字 -->
+  <div class="notice">
+    頻率：每小時記錄一次
+  </div>
+
   <h2 id="title">設備記錄</h2>
 
-  <input id="temp" type="number" step="0.1" placeholder="請輸入溫度">
+  <!-- 溫度 -->
+  <input
+    id="temp"
+    type="number"
+    step="0.1"
+    placeholder="請輸入溫度 (°C)"
+  >
+
   <div id="alert" class="warning-text"></div>
 
-  <input id="name" placeholder="請輸入姓名">
-  <input id="remark" placeholder="備註(若有異常請填寫原因)">
+  <!-- 🔥 新增濕度 -->
+  <input
+    id="humidity"
+    type="number"
+    step="0.1"
+    placeholder="請輸入濕度 (%)"
+  >
 
-  <button id="submitBtn" onclick="send()">送出</button>
+  <!-- 姓名 -->
+  <input
+    id="name"
+    placeholder="請輸入姓名"
+  >
+
+  <!-- 備註 -->
+  <input
+    id="remark"
+    placeholder="備註(若有異常請填寫原因)"
+  >
+
+  <!-- 按鈕 -->
+  <button id="submitBtn" onclick="send()">
+    送出
+  </button>
 
   <p id="msg"></p>
+
 </div>
 
 <script>
 
-const API_URL = "https://script.google.com/macros/s/AKfycbzG-rsW9enCg1uOJwCardM9xyUQS2QbIUwEXj4ylV_D-xhKupgSpWmEstwo5lQsUHTBgg/exec";
+const API_URL =
+"https://script.google.com/macros/s/AKfycbwLS4q7VnSMCaRCSE5LEtMNXLUcYHGplArPna7JQpx-v6BvO_jkullKF3_ce1M_3q6d/exec";
 
-// 取得設備
+
+// 🔵 取得設備
 function getDevice(){
   return new URLSearchParams(window.location.search).get("device");
 }
 
 const device = getDevice();
+
 const tempInput = document.getElementById("temp");
 const alertBox = document.getElementById("alert");
 
-// 標題
+
+// 🔵 顯示標題
 document.getElementById("title").innerText =
-  device ? device + " 溫度記錄" : "⚠️ 未指定設備";
+  device
+    ? device + " 溫溼度記錄"
+    : "⚠️ 未指定設備";
 
 
 // 🔥 異常判斷
@@ -117,15 +170,26 @@ tempInput.addEventListener("input", () => {
     return;
   }
 
+  // 冷藏 > 7
   if(device.includes("冷藏") && temp > 7){
-    alertBox.innerText = "⚠️ 溫度過高（冷藏應 ≤ 7°C）";
+
+    alertBox.innerText =
+      "⚠️ 溫度過高（冷藏應 ≤ 7°C）";
+
     tempInput.classList.add("warning");
   }
+
+  // 冷凍 > -18
   else if(device.includes("冷凍") && temp > -18){
-    alertBox.innerText = "⚠️ 溫度過高（冷凍應 ≤ -18°C）";
+
+    alertBox.innerText =
+      "⚠️ 溫度過高（冷凍應 ≤ -18°C）";
+
     tempInput.classList.add("warning");
   }
+
   else{
+
     alertBox.innerText = "";
     tempInput.classList.remove("warning");
   }
@@ -138,65 +202,116 @@ function send(){
   const btn = document.getElementById("submitBtn");
   const msg = document.getElementById("msg");
 
-  const temp = tempInput.value.trim();
-  const name = document.getElementById("name").value.trim();
-  const remark = document.getElementById("remark").value.trim();
+  const temp =
+    document.getElementById("temp").value.trim();
 
+  // 🔥 新增濕度
+  const humidity =
+    document.getElementById("humidity").value.trim();
+
+  const name =
+    document.getElementById("name").value.trim();
+
+  const remark =
+    document.getElementById("remark").value.trim();
+
+
+  // 檢查設備
   if(!device){
+
     msg.innerText = "❌ 沒有設備參數";
     return;
   }
 
+  // 檢查溫度
   if(!temp){
+
     msg.innerText = "⚠️ 請輸入溫度";
     return;
   }
 
+  // 🔥 檢查濕度
+  if(!humidity){
+
+    msg.innerText = "⚠️ 請輸入濕度";
+    return;
+  }
+
+  // 檢查姓名
   if(!name){
+
     msg.innerText = "⚠️ 請輸入姓名";
     return;
   }
 
+
   // 🔴 異常強制備註
   const t = parseFloat(temp);
+
   if(
     (device.includes("冷藏") && t > 7) ||
     (device.includes("冷凍") && t > -18)
   ){
+
     if(!remark){
+
       msg.innerText = "⚠️ 異常請填寫備註";
       return;
     }
   }
 
-  // UI 狀態
+
+  // 🔵 UI 狀態
   btn.disabled = true;
   btn.classList.add("loading");
   btn.innerText = "送出中...";
   msg.innerText = "";
 
+
+  // 🔥 寫入 Apps Script
   fetch(API_URL, {
+
     method: "POST",
+
     body: new URLSearchParams({
+
       action: "write",
+
       temp: temp,
+
+      // 🔥 新增濕度
+      humidity: humidity,
+
       name: name,
+
       remark: remark,
+
       device: device
     })
   })
+
   .then(() => {
 
-    // ✅ 完成畫面（取代關閉）
+    // ✅ 完成畫面
     document.body.innerHTML = `
-      <div style="text-align:center;padding:40px;">
-        <h2>✅ 已送出</h2>
+      <div style="
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        height:100vh;
+        flex-direction:column;
+        font-family:sans-serif;
+      ">
+        <h1>✅ 已送出</h1>
         <p>可直接關閉此頁面</p>
       </div>
     `;
   })
+
   .catch(() => {
+
     msg.innerText = "❌ 寫入失敗";
+
     btn.disabled = false;
     btn.classList.remove("loading");
     btn.innerText = "送出";
