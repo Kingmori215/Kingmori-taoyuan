@@ -245,9 +245,9 @@ async function loadAllDevices(){
 
         // 🔥 濕度異常判斷
         let humidityClass = "";
-        let humidityValue = d.humidity || "";
+        let humidityValue = d.humidity;
 
-        const humidity = parseFloat(d.humidity || "");
+        const humidity = parseFloat(d.humidity);
 
         // 🔥 倉儲區域濕度異常判定（可自行修改）
         if(humidity > 90){
