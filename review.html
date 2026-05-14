@@ -149,10 +149,10 @@ const API = "https://script.google.com/macros/s/AKfycbzG-rsW9enCg1uOJwCardM9xyUQ
 // 🔥 區域名稱設定
 const deviceNames = {
 
-  "1": "包裝區",
-  "2": "緩衝區",
-  "3": "商品存放Ｂ區",
-  "4": "商品存放Ｃ區"
+  "包裝區",
+  "緩衝區",
+  "商品存放Ｂ區",
+  "商品存放Ｃ區"
 
 };
 
@@ -239,7 +239,7 @@ async function loadAllDevices(){
         const temp = parseFloat(d.temp);
 
         // 🔥 倉儲區域溫度異常判定（可自行修改）
-        if(temp > 25 || temp < 15){
+        if(temp > 28){
           tempClass = "temp-danger";
         }
 
